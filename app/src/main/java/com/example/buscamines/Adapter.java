@@ -6,16 +6,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.GridView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
 
@@ -28,6 +31,8 @@ public class Adapter extends BaseAdapter {
     int celdasRestantes;
     List<Element> tablero;
     TextView textCeldasRestantes;
+    int seconds=0;
+    long startTime = System.currentTimeMillis();
 
     public Adapter(Context context, List<Element> tablero, int size, int bombs, String values, TextView textCeldasRestantes) {
         this.textCeldasRestantes = textCeldasRestantes;
@@ -38,9 +43,17 @@ public class Adapter extends BaseAdapter {
         this.bombs = bombs;
         this.values = values;
         celdasRestantes = size*size;
-        textCeldasRestantes.setText(""+celdasRestantes);
+        textCeldasRestantes.setText(""+celdasRestantes + " Caselles per descobrir");
+        //timeHandler.postDelayed(timerRunnable, 0);
     }
 
+    /*Handler timeHandler = new Handler();
+    Runnable timerRunnable = () -> {
+        long millis = System.currentTimeMillis() - startTime;
+        seconds = (int) millis / 1000;
+        timeHandler.postDelayed((Runnable) this.timeHandler, 1000);
+        System.out.println(seconds);
+    };*/
 
     @Override
     public int getCount() {
@@ -141,7 +154,12 @@ public class Adapter extends BaseAdapter {
     }
 
     private void AddExtras(Intent in){
-        in.putExtra()
+        in.putExtra("Nombre", values);
+        in.putExtra("Casillas", size*size);
+        in.putExtra("PorcentajeMinas", bombs);
+        in.putExtra("NumeroMinas", (int)((size*size)*(bombs/100.0)));
+
+
     }
 
 
@@ -182,7 +200,7 @@ public class Adapter extends BaseAdapter {
         @Override
         public void onClick(View view){
             celdasRestantes -=1;
-            textCeldasRestantes.setText(""+celdasRestantes);
+            textCeldasRestantes.setText(""+celdasRestantes + " Caselles per descobrir");
             notifyDataSetChanged();
             Button btn = (Button) view.findViewById(view.getId());
             Element celda = tablero.get(position);
@@ -194,7 +212,11 @@ public class Adapter extends BaseAdapter {
                     gameOverPosition = celda.StringPosicion();
                     btn.setText("💣");
                     int fila = ((position+1)/size)+1;
-                    int columna = ((position+1)%size) * size;
+
+                    double temp = (position+1) % size;
+                    long iPart = (long) temp;
+                    temp = temp-iPart;
+                    int columna = (int) temp * size;
                     PartidaPerdida(""+fila+","+columna);
                 }
                 else{

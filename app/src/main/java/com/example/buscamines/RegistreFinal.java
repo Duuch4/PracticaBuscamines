@@ -25,41 +25,64 @@ public class RegistreFinal extends AppCompatActivity {
     TextView valorsLog;
     private EditText destinatari;
     private EditText Subjecte;
-    private EditText Cos;
     Button enviar;
     private Bundle bundle;
-
+    Button partidanueva;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registre_final);
+        partidanueva = findViewById(R.id.buttonPartida);
+
         textView = findViewById(R.id.text_view_dia);
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE, dd-MMM-yyyy hh:mm:ss a");
+        SimpleDateFormat diaIHora = new SimpleDateFormat("dd/MMM hh:mm");
         String dateTime = simpleDateFormat.format(calendar.getTime());
+        String dataSubjecte = diaIHora.format(calendar.getTime());
         textView.setText(dateTime);
 
         valorsLog = findViewById(R.id.valorsLog);
         Datos();
         destinatari = findViewById(R.id.email);
-        Subjecte = findViewById(R.id.subject);
-        Cos = findViewById(R.id.cos);
         enviar = findViewById(R.id.enviar);
-
 
         enviar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String destinataris = destinatari.getText().toString().trim(); // amb el trim treurem els espais d'abans i después
-                String subject = Subjecte.getText().toString().trim();
-                String Coss = Cos.getText().toString().trim();
-
+                String subject = "Log-" + dataSubjecte;//Subjecte.getText().toString().trim();
+                String Coss = valorsLog.getText().toString().trim();
                 EnviarEmail (destinataris,subject,Coss);
-
             }
         });
+
+        partidanueva.setOnClickListener(v -> {
+            Intent intent = new Intent(this, Configuracion.class);
+            startActivity(intent);
+            finish();
+        });
+
+    }
+
+    private void EnviarEmail(String destinataris, String subject, String Coss) {
+        Intent emailIntent = new Intent (Intent.ACTION_SEND);
+        emailIntent.setData(Uri.parse("Correu a:"));
+        emailIntent.setType("text/plain");
+
+        emailIntent.putExtra(Intent.EXTRA_EMAIL,new String[] {destinataris});
+        emailIntent.putExtra(Intent.EXTRA_SUBJECT,subject);
+        emailIntent.putExtra(Intent.EXTRA_TEXT,Coss);
+
+        try {
+            startActivity(Intent.createChooser(emailIntent,"Tria un client de correu"));
+        }
+        catch (Exception e){
+            Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
+
+        }
     }
 
     private void Datos(){
@@ -86,24 +109,20 @@ public class RegistreFinal extends AppCompatActivity {
                 valorsLog.setText("Has agotado el tiempo \n Te han quedado " + celdasRestantes + " Casillas por descubrir");
             }
         }
+
+        valorsLog.setText("Alias: " + bundle.getString("Nombre")+"\n" + "Casillas: " + bundle.getInt("Casillas")+ " Porcentaje minas: " +
+                bundle.getInt("PorcentajeMinas") + "% \n Nº minas: " +bundle.getInt("NumeroMinas")+ "\n"+ valorsLog.getText());
+        valorsLog.setText("\n"+ valorsLog.getText());
+        valorsLog.setText("\n"+ valorsLog.getText());
+        valorsLog.setText("\n"+ valorsLog.getText());
     }
 
-    private void EnviarEmail(String destinataris, String subject, String Coss) {
-        Intent emailIntent = new Intent (Intent.ACTION_SEND);
-        emailIntent.setData(Uri.parse("Correu a:"));
-        emailIntent.setType("text/plain");
 
-        emailIntent.putExtra(Intent.EXTRA_EMAIL,new String[] {destinataris});
-        emailIntent.putExtra(Intent.EXTRA_SUBJECT,subject);
-        emailIntent.putExtra(Intent.EXTRA_TEXT,Coss);
-
-        try {
-            startActivity(Intent.createChooser(emailIntent,"Tria un client de correu"));
-        }
-        catch (Exception e){
-            Toast.makeText(this,e.getMessage(),Toast.LENGTH_SHORT).show();
-
-        }
+    public void salirfinal(View view) {
+        moveTaskToBack(true);
+        android.os.Process.killProcess(android.os.Process.myPid());
+        finish();
+        System.exit(1);
     }
 
 
